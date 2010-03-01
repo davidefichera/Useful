@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAXCHARLINE (1024)
+int main( int argc, char **argv){
+  char NameFile[32], NameOpen[32], line[MAXCHARLINE];
+  char *ptr;
+  FILE *ToWrite, *ToRead, *ListFile;
+  sprintf(NameFile,argv[1]);
+  printf("reading %s\n",NameFile);
+  ToRead = fopen(NameFile,"r");
+  strcpy(NameFile + strlen(NameFile) - 4,"List.txt");
+  ListFile = fopen(NameFile,"w");
+  sprintf(line,"$$$$");
+  while(1){
+    while(strncmp(line,"$$$$",4) )
+      if(fgets(line,MAXCHARLINE,ToRead) == NULL){
+	fclose(ToRead);
+	fclose(ListFile);
+	return 0;
+      }
+    if(fgets(line,MAXCHARLINE,ToRead)== NULL){ 
+      fclose(ToRead);
+      fclose(ListFile);
+      return 0;
+    }
+    ptr = strtok (line," ");
+    strncpy(NameOpen,ptr,strlen(ptr)-1);
+    strcpy(NameOpen+strlen(ptr)-1,".mol");
+    fprintf(ListFile,"WriteOn %s \n",NameOpen);
+    ToWrite = fopen(NameOpen,"w");
+    fprintf(ToWrite,"%s",line);
+    while(strncmp(line,"M  END",4)){
+      if(fgets(line,MAXCHARLINE,ToRead)== NULL){
+	fclose(ToRead);
+	fclose(ListFile);
+	fclose(ToWrite);
+	return 0;
+      }
+      fprintf(ToWrite,"%s",line);
+    }
+    fclose(ToWrite);
+  }
+}
